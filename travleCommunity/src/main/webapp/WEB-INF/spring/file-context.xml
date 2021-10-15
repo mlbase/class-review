@@ -14,7 +14,7 @@
 	
 	
 	<!-- download -->
-	<bean id="downloadView" class="mul.cum.a.util.DownloadView"></bean>
+	<bean id="downloadView" class="mul.com.tc.util.DownloadView"></bean>
 	
 	<bean id="downloadViewResolver" class="org.springframework.web.servlet.view.BeanNameViewResolver">
 		<property name="order">

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="User">
+
+<select id="emailCheck" parameterType="java.lang.String" resultType="java.lang.Integer" >
+	SELECT COUNT(*) FROM SC_USER
+	WHERE EMAIL=#{ email }
+</select>
+
+<select id="nickCheck" parameterType="java.lang.String" resultType="java.lang.Integer" >
+	SELECT COUNT(*) FROM SC_USER
+	WHERE NICKNAME=#{ nickname }
+</select>
+
+<insert id="addUser" parameterType="mul.com.tc.dto.UserDto">
+	INSERT INTO SC_USER(ID, EMAIL, PWD, NICKNAME, DEL, CREATEDAT, AVATAR, AUTH)
+	VALUES(TC_USER_SEQ.NEXTVAL, #{email}, #{pwd}, #{nickname}, 0, SYSDATE, '', 3)
+</insert>
+
+<select id="login" parameterType="mul.com.tc.dto.UserDto" resultType="mul.com.tc.dto.UserDto">
+	SELECT ID, EMAIL, PWD, NICKNAME, DEL, CREATEDAT, AVATAR, AUTH
+	FROM SC_USER
+	WHERE EMAIL=#{email}
+</select>
+
+</mapper>

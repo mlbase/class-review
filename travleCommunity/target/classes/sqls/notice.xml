@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="notice">
+<select id="getlist" resultType="mul.com.tc.dto.NoticeDto">
+	SELECT SEQ, USERID, TITLE, CONTENT, READCOUNT, BBSID, FILENAME, NICKNAME, AVATAR
+	FROM SC_NOTICE, SC_USER
+	WHERE SC_NOTICE.USERID=SC_USER.ID
+</select>
+
+<select id="getnotice" parameterType="java.lang.Integer" resultType="mul.com.tc.dto.NoticeDto">
+	SELECT SEQ, USERID, TITLE, CONTENT, READCOUNT, BBSID, FILENAME, NICKNAME, AVATAR
+	FROM SC_NOTICE, SC_USER
+	WHERE SC_NOTICE.USERID=SC_USER.ID AND SC_NOTICE.SEQ=#{seq} 	
+</select>
+
+<insert id="writenotice" parameterType="mul.com.tc.dto.NoticeDto">
+	INSERT INTO SC_NOTICE(SEQ, USERID, TITLE, CONTENT, READCOUNT, BBSID, FILENAME)
+	VALUES (SC_NOTICE_SEQ.NEXTVAL, #{userid}, #{title}, #{content}, #{readcount}, #{bbsid}, #{filename})
+</insert>
+
+<update id="updatenotice" parameterType="mul.com.tc.dto.NoticeDto">
+	UPDATE SC_NOTICE
+	SET TITLE=#{title}, CONTENT=#{content}, FILENAME=#{filename}
+	WHERE SEQ=#{seq}
+
+</update>
+
+<update id="readcountnotice" parameterType="java.lang.Integer">
+	UPDATE SC_NOTICE
+	SET READCOUNT=READCOUNT+1
+	WHERE SEQ=#{seq}
+
+</update>
+
+<delete id="deltenotice" parameterType="java.lang.Integer">
+	DELETE FROM SC_NOTICE
+	WHERE SEQ=#{seq}
+</delete>
+
+</mapper>
