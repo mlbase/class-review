@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="Bbs">
+
+<select id="getBbslist" parameterType="mul.com.sc.dto.BbsParam" resultType="mul.com.sc.dto.BbsDto">
+	SELECT SEQ, USERID, TITLE, CONTENT, READCOUNT, REGDATE, 
+			(SELECT NICKNAME FROM SC_USER WHERE ID=USERID) AS NICKNAME
+	FROM (SELECT ROW_NUMBER()OVER(ORDER BY SEQ DESC) AS RNUM,
+			SEQ, USERID, TITLE, CONTENT, READCOUNT, REGDATE
+			FROM SC_BBS
+		<if test="choice == 'title'">
+			WHERE TITLE LIKE '%'||#{ search }||'%'
+		</if>
+		<if test="choice == 'content'">
+			WHERE CONTENT LIKE '%'||#{ search }||'%'
+		</if>
+		<if test="choice == 'id'">
+			WHERE USERID=(SELECT ID FROM SC_USER WHERE NICKNAME=#{ search })
+		</if>
+		)
+	WHERE RNUM BETWEEN #{start} AND #{end}
+</select>
+
+<select id="getAllBbs" parameterType="mul.com.sc.dto.BbsParam" resultType="Integer">
+	SELECT COUNT(*) FROM SC_BBS
+	<if test="choice == 'title'">
+		WHERE TITLE LIKE '%' ||#{ search }||'%'
+	</if>
+	<if test="choice == 'content'">
+		WHERE CONTENT LIKE '%' ||#{ search }||'%'
+	</if>
+	<if test="choice == 'id'">
+		WHERE USERID=(SELECT ID FROM SC_USER WHERE NICKNAME=#{ search })
+	</if>
+</select>
+
+<select id="getBbs" parameterType="Integer" resultType="mul.com.sc.dto.BbsDto">
+	SELECT SEQ, USERID, TITLE, CONTENT, READCOUNT, REGDATE, (SELECT NICKNAME FROM SC_USER WHERE ID=USERID) NICKNAME
+	FROM SC_BBS
+	WHERE SEQ=#{seq}
+</select>
+
+<update id="readCount" parameterType="Integer">
+	UPDATE SC_BBS
+	SET READCOUNT=READCOUNT+1
+	WHERE SEQ=#{seq}
+</update>
+
+<insert id="writeBbs" parameterType="mul.com.sc.dto.BbsDto">
+	INSERT INTO SC_BBS(SEQ, USERID, TITLE, CONTENT, READCOUNT, REGDATE)
+	VALUES(SC_BBS_SEQ.NEXTVAL, #{userId}, #{title}, #{content}, 0, SYSDATE)
+</insert>
+
+<update id="updateBbs" parameterType="mul.com.sc.dto.BbsDto">
+	UPDATE SC_BBS
+	SET TITLE=#{title}, CONTENT=#{content}
+	WHERE SEQ=#{seq}
+</update>
+
+<delete id="deleteBbs" parameterType="Integer">
+	DELETE FROM SC_BBS
+	WHERE SEQ=#{seq}
+</delete>
+
+<select id="getLatestBbs" resultType="mul.com.sc.dto.BbsDto">
+	SELECT SEQ, TITLE, REGDATE
+	FROM ( SELECT SEQ, TITLE, REGDATE,
+	RANK() OVER (ORDER BY SEQ DESC) AS RNK
+	FROM SC_BBS)
+	WHERE RNK &lt; 6
+</select>
+
+
+</mapper>

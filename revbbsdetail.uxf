@@ -1,0 +1,146 @@
+<diagram program="umletino" version="14.4.0-SNAPSHOT"><zoom_level>10</zoom_level><help_text>&lt;diagram program="umletino" version="14.4.0-SNAPSHOT"&gt;&lt;zoom_level&gt;10&lt;/zoom_level&gt;&lt;element&gt;&lt;id&gt;UMLClass&lt;/id&gt;&lt;coordinates&gt;&lt;x&gt;470&lt;/x&gt;&lt;y&gt;150&lt;/y&gt;&lt;w&gt;310&lt;/w&gt;&lt;h&gt;180&lt;/h&gt;&lt;/coordinates&gt;&lt;panel_attributes&gt;RevBbsDao
+
+
+{innerclass
+public List&amp;lt;RevBbsDto&amp;gt; getReviewList(RevBbsParam param)
+--
+return session.selectList(ns + "revbbs", param);
+innerclass}
+
+{innerclass
+public int getAllReview(RevBbsParam param)
+--
+return session.selectOne(ns + "allreview", param);
+innerclass}
+
+&lt;/panel_attributes&gt;&lt;additional_attributes&gt;&lt;/additional_attributes&gt;&lt;/element&gt;&lt;/diagram&gt;&lt;diagram program="umletino" version="14.4.0-SNAPSHOT"&gt;&lt;zoom_level&gt;10&lt;/zoom_level&gt;&lt;element&gt;&lt;id&gt;UMLClass&lt;/id&gt;&lt;coordinates&gt;&lt;x&gt;530&lt;/x&gt;&lt;y&gt;30&lt;/y&gt;&lt;w&gt;190&lt;/w&gt;&lt;h&gt;90&lt;/h&gt;&lt;/coordinates&gt;&lt;panel_attributes&gt;Service
+{innerclass
+RevBbsService
+--
+RevBbsDao dao
+innerclass}
+
+&lt;/panel_attributes&gt;&lt;additional_attributes&gt;&lt;/additional_attributes&gt;&lt;/element&gt;&lt;/diagram&gt;&lt;diagram program="umletino" version="14.4.0-SNAPSHOT"&gt;&lt;zoom_level&gt;10&lt;/zoom_level&gt;&lt;element&gt;&lt;id&gt;UMLClass&lt;/id&gt;&lt;coordinates&gt;&lt;x&gt;530&lt;/x&gt;&lt;y&gt;30&lt;/y&gt;&lt;w&gt;190&lt;/w&gt;&lt;h&gt;90&lt;/h&gt;&lt;/coordinates&gt;&lt;panel_attributes&gt;Service
+{innerclass
+RevBbsService
+--
+RevBbsDao dao
+innerclass}
+
+&lt;/panel_attributes&gt;&lt;additional_attributes&gt;&lt;/additional_attributes&gt;&lt;/element&gt;&lt;/diagram&gt;&lt;diagram program="umletino" version="14.4.0-SNAPSHOT"&gt;&lt;zoom_level&gt;10&lt;/zoom_level&gt;&lt;element&gt;&lt;id&gt;UMLClass&lt;/id&gt;&lt;coordinates&gt;&lt;x&gt;480&lt;/x&gt;&lt;y&gt;190&lt;/y&gt;&lt;w&gt;310&lt;/w&gt;&lt;h&gt;180&lt;/h&gt;&lt;/coordinates&gt;&lt;panel_attributes&gt;RevBbsDao
+
+
+{innerclass
+public List&amp;lt;RevBbsDto&amp;gt; getReviewList(RevBbsParam param)
+--
+return session.selectList(ns + "revbbs", param);
+innerclass}
+
+{innerclass
+public int getAllReview(RevBbsParam param)
+--
+return session.selectOne(ns + "allreview", param);
+innerclass}
+
+&lt;/panel_attributes&gt;&lt;additional_attributes&gt;&lt;/additional_attributes&gt;&lt;/element&gt;&lt;/diagram&gt;&lt;diagram program="umletino" version="14.4.0-SNAPSHOT"&gt;&lt;zoom_level&gt;10&lt;/zoom_level&gt;&lt;element&gt;&lt;id&gt;UMLClass&lt;/id&gt;&lt;coordinates&gt;&lt;x&gt;530&lt;/x&gt;&lt;y&gt;40&lt;/y&gt;&lt;w&gt;190&lt;/w&gt;&lt;h&gt;90&lt;/h&gt;&lt;/coordinates&gt;&lt;panel_attributes&gt;Service
+{innerclass
+RevBbsService
+--
+RevBbsDao dao
+innerclass}
+
+&lt;/panel_attributes&gt;&lt;additional_attributes&gt;&lt;/additional_attributes&gt;&lt;/element&gt;&lt;/diagram&gt;&lt;diagram program="umletino" version="14.4.0-SNAPSHOT"&gt;&lt;zoom_level&gt;10&lt;/zoom_level&gt;&lt;element&gt;&lt;id&gt;UMLClass&lt;/id&gt;&lt;coordinates&gt;&lt;x&gt;20&lt;/x&gt;&lt;y&gt;0&lt;/y&gt;&lt;w&gt;420&lt;/w&gt;&lt;h&gt;280&lt;/h&gt;&lt;/coordinates&gt;&lt;panel_attributes&gt;RevBbsController
+
+
+
+{innerclass
+@RequestMapping(value = "revdetail.do", method = RequestMethod.GET)
+	public String revdetail(int seq, Model model)
+--
+	String content = "";
+			
+		 content = "revdetail";
+		
+		 RevBbsDto rbbs = service.getReview(seq);
+		 service.revreadcount(seq);
+		model.addAttribute("rbbs", rbbs);
+
+		model.addAttribute("content", "revdetail");
+		return "base";
+innerclass}
+&lt;/panel_attributes&gt;&lt;additional_attributes&gt;&lt;/additional_attributes&gt;&lt;/element&gt;&lt;/diagram&gt;Space for diagram notes</help_text><element><id>UMLClass</id><coordinates><x>50</x><y>20</y><w>420</w><h>280</h></coordinates><panel_attributes>RevBbsController
+
+
+
+{innerclass
+@RequestMapping(value = "revdetail.do", method = RequestMethod.GET)
+	public String revdetail(int seq, Model model)
+--
+	String content = "";
+			
+		 content = "revdetail";
+		
+		 RevBbsDto rbbs = service.getReview(seq);
+		 service.revreadcount(seq);
+		model.addAttribute("rbbs", rbbs);
+
+		model.addAttribute("content", "revdetail");
+		return "base";
+innerclass}
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>50</x><y>380</y><w>420</w><h>250</h></coordinates><panel_attributes>CommentController
+
+
+
+{innerclass
+@ResponseBody
+	@RequestMapping(value="getAllComment.do", method=RequestMethod.POST, produces = "application/text; charset=UTF-8")
+	public String getAllComment(CommentDto dto)
+--
+	JSONObject comments = new JSONObject();
+		
+		List&lt;CommentDto&gt; list = service.getCommentList(dto);
+		comments.put("comments", list);
+		
+		return comments.toString();
+innerclass}
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>560</x><y>10</y><w>190</w><h>90</h></coordinates><panel_attributes>Service
+{innerclass
+RevBbsService
+--
+RevBbsDao dao
+innerclass}
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>500</x><y>150</y><w>310</w><h>180</h></coordinates><panel_attributes>RevBbsDao
+
+
+{innerclass
+public RevBbsDto getReview(int seq)
+--
+return session.selectOne(ns + "getReview", seq);
+innerclass}
+
+{innerclass
+public void revreadcount(int seq)
+--
+session.update(ns + "revreadcount", seq);
+innerclass}
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>560</x><y>380</y><w>190</w><h>80</h></coordinates><panel_attributes>Service
+{innerclass
+CommentService
+--
+CommentDao dao
+innerclass}
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>500</x><y>530</y><w>310</w><h>120</h></coordinates><panel_attributes>CommentDao
+
+
+{innerclass
+public List&lt;CommentDto&gt; getCommentList(CommentDto com)
+--
+return session.selectList(ns+"commentList", com);
+innerclass}
+
+
+
+</panel_attributes><additional_attributes></additional_attributes></element></diagram>

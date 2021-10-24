@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="RevBbs">
+
+<!-- 게시글 리스트 NICKNAME은 이중쿼리문 사용-->
+<select id="revbbs" parameterType="mul.com.sc.dto.RevBbsParam" resultType="mul.com.sc.dto.RevBbsDto">
+SELECT SEQ, USERID, TITLE, CONTENT, READCOUNT, REGDATE, 
+			(SELECT NICKNAME FROM SC_USER WHERE ID=USERID) AS NICKNAME
+	FROM (SELECT ROW_NUMBER()OVER(ORDER BY SEQ DESC) AS RNUM,
+			SEQ, USERID, TITLE, CONTENT, READCOUNT, REGDATE
+			FROM SC_REVIEW
+		<if test="choice == 'title'">
+			WHERE TITLE LIKE '%'||#{ search }||'%'
+		</if>
+		<if test="choice == 'content'">
+			WHERE CONTENT LIKE '%'||#{ search }||'%'
+		</if>
+		<if test="choice == 'id'">
+			WHERE USERID=(SELECT ID FROM SC_USER WHERE NICKNAME=#{ search })
+		</if>
+		)
+	WHERE RNUM BETWEEN #{start} AND #{end}
+	
+</select>
+
+<!-- 게시글 갯수 -->
+<select id="allreview" parameterType="mul.com.sc.dto.RevBbsParam" resultType="Integer">
+	SELECT COUNT(*) 
+	FROM SC_REVIEW
+	<if test="choice == 'title'">
+		WHERE TITLE LIKE '%'||#{ search }||'%'
+	</if>
+	<if test="choice == 'content'">
+		WHERE CONTENT LIKE '%'||#{ search }||'%'
+	</if>
+	<if test="choice == 'nickname'">
+		WHERE (SELECT NICKNAME FROM SC_USER WHERE ID = USERID) AS NICKNAME=#{ search }
+	</if>
+</select>
+
+<!-- 게시글 쓰기 -->
+<insert id="writeReview" parameterType="mul.com.sc.dto.RevBbsDto">
+	INSERT INTO SC_REVIEW(SEQ, USERID, TITLE, CONTENT, FILENAME, REGDATE, READCOUNT)
+	VALUES(SC_REVIEW_SEQ.NEXTVAL, #{userid}, #{title}, #{content}, #{filename}, SYSDATE, 0)
+</insert>
+
+<!-- 게시글 찾기 -->
+<select id="getReview" parameterType="Integer" resultType="mul.com.sc.dto.RevBbsDto">
+	SELECT SEQ, 
+	(SELECT NICKNAME FROM SC_USER WHERE ID = USERID) NICKNAME, 
+	TITLE, CONTENT, FILENAME, REGDATE, READCOUNT
+	FROM SC_REVIEW
+	WHERE SEQ=#{seq}	
+</select>
+
+<!-- 조회수 증가 -->
+<update id="revreadcount" parameterType="Integer">
+	UPDATE SC_REVIEW
+	SET READCOUNT=READCOUNT+1
+	WHERE SEQ=#{seq}
+</update>
+
+<!-- 게시글 수정하기 -->
+<update id="updateReview" parameterType="mul.com.sc.dto.RevBbsDto">
+	UPDATE SC_REVIEW
+	SET TITLE=#{title}, CONTENT=#{content}, FILENAME=#{filename}
+	WHERE SEQ=#{seq}
+</update>
+
+<!-- 게시글 삭제하기 -->
+<delete id="deleteReview" parameterType="Integer">
+	DELETE FROM SC_REVIEW
+	WHERE SEQ=#{seq}
+</delete>
+
+<select id="getLatestRev" resultType="mul.com.sc.dto.RevBbsDto">
+	SELECT SEQ, TITLE, REGDATE
+	FROM ( SELECT SEQ, TITLE, REGDATE,
+	RANK() OVER (ORDER BY SEQ DESC) AS RNK
+	FROM SC_REVIEW)
+	WHERE RNK &lt; 6
+</select>
+
+</mapper>
+
+

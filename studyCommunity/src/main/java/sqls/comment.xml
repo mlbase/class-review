@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+ <mapper namespace="Comment">
+ <insert id="writeComment" parameterType="mul.com.sc.dto.CommentDto">
+	<choose>
+		<when test="bbschoice == 1">
+			INSERT INTO SC_COMMENT(BBSCHOICE, SEQ, USERID, BBSSEQ, CONTENT, REGDATE)
+			VALUES(1, SC_COMMENT_SEQ.NEXTVAL, #{userid}, #{bbsseq}, #{content}, SYSDATE)
+		</when>
+		<when test="bbschoice == 2">
+			INSERT INTO SC_COMMENT(BBSCHOICE, SEQ, USERID, PDSSEQ, CONTENT, REGDATE)
+			VALUES(2, SC_COMMENT_SEQ.NEXTVAL, #{userid}, #{pdsseq}, #{content}, SYSDATE)
+		</when>
+		<when test="bbschoice == 3" >
+			INSERT INTO SC_COMMENT(BBSCHOICE, SEQ, USERID, REVIEWSEQ, CONTENT, REGDATE )
+			VALUES(3, SC_COMMENT_SEQ.NEXTVAL, #{userid}, #{reviewseq}, #{content}, SYSDATE)
+		</when>
+		<when test="bbschoice == 4">
+			INSERT INTO SC_COMMENT(BBSCHOICE, SEQ, USERID, NOTICESEQ, CONTENT, REGDATE )
+			VALUES(4, SC_COMMENT_SEQ.NEXTVAL, #{userid}, #{noticeseq}, #{content}, SYSDATE)
+		</when>
+	</choose>
+</insert>
+<select id="getcomment" parameterType="java.lang.Integer" resultType="mul.com.sc.dto.CommentDto">
+	
+		SELECT SEQ, USERID, CONTENT, REGDATE,
+		(SELECT NICKNAME FROM SC_USER SU WHERE SU.ID = SC_COMMENT.USERID) NICKNAME
+		FROM SC_COMMENT
+		WHERE SEQ=#{seq}
+</select>
+
+<!-- '특정 게시판의 글'을 누르면 그 글에 달린 '댓글 리스트' 가져오기 NICKNAME 이중쿼리 -->
+<select id="commentList" parameterType="mul.com.sc.dto.CommentDto" resultType="mul.com.sc.dto.CommentDto">
+	SELECT SEQ, USERID, CONTENT, REGDATE,
+	(SELECT NICKNAME FROM SC_USER SU WHERE SU.ID = SC_COMMENT.USERID) NICKNAME		 
+	FROM SC_COMMENT
+		<if test="bbschoice == 1">
+			WHERE BBSSEQ = #{bbsseq}
+		</if>
+		<if test="bbschoice == 2">
+			WHERE PDSSEQ = #{pdsseq}
+		</if>
+		<if test="bbschoice == 3">
+			WHERE REVIEWSEQ = #{reviewseq}
+		</if>
+		<if test="bbschoice == 4">
+			WHERE NOTICESEQ = #{noticeseq}
+		</if>
+	ORDER BY REGDATE DESC
+</select>
+
+<!-- 댓글 수정하기 -->
+<update id="updateComment" parameterType="mul.com.sc.dto.CommentDto">
+	UPDATE SC_COMMENT
+	SET CONTENT=#{content}
+	WHERE SEQ=#{seq}
+</update>
+
+<!-- '댓글' 삭제하기 -->
+<delete id="deleteComment" parameterType="Integer">
+	DELETE FROM SC_COMMENT
+	WHERE SEQ=#{seq}
+</delete>
+
+<delete id="deleteAllComment" parameterType="mul.com.sc.dto.CommentDto">
+		DELETE FROM SC_COMMENT
+		<if test="bbschoice == 1">
+			WHERE BBSSEQ = #{bbsseq}
+		</if>
+		<if test="bbschoice == 2">
+			WHERE PDSSEQ = #{pdsseq}
+		</if>
+		<if test="bbschoice == 3">
+			WHERE REVIEWSEQ = #{reviewseq}
+		</if>
+		<if test="bbschoice == 4">
+			WHERE NOTICESEQ = #{noticeseq}
+		</if>
+</delete>
+</mapper>

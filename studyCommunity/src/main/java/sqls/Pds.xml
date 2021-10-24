@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="Pds">
+
+<select id="pdslist" parameterType="mul.com.sc.dto.PdsParam" resultType="mul.com.sc.dto.PdsDto">
+	SELECT USERID, SEQ, TITLE, CONTENT, 
+		   FILENAME, NEWFILENAME, READCOUNT, DOWNCOUNT, REGDATE, 
+	       (SELECT NICKNAME FROM SC_USER WHERE ID = USERID) NICKNAME, 
+	       (SELECT AVATAR FROM SC_USER WHERE ID = USERID) AVATAR
+		FROM (SELECT ROW_NUMBER()OVER(ORDER BY SEQ DESC) AS RNUM,
+					 USERID, SEQ, TITLE, CONTENT, FILENAME, 
+					 NEWFILENAME, READCOUNT, DOWNCOUNT, REGDATE
+
+		FROM SC_PDS
+		<if test="choice == 'title'">
+			WHERE TITLE LIKE '%'||#{ search }||'%'
+		</if>
+		<if test="choice == 'content'">
+			WHERE CONTENT LIKE '%'||#{ search }||'%'
+		</if>
+		<if test="choice == 'id'">
+			WHERE USERID= (SELECT ID FROM SC_USER WHERE NICKNAME = #{search})
+		</if>
+		ORDER BY SEQ DESC)
+	WHERE RNUM BETWEEN #{start} AND #{end}
+</select>
+
+
+<select id="allpds" parameterType="mul.com.sc.dto.PdsParam" resultType="Integer">
+	SELECT COUNT(*) 
+	FROM SC_PDS
+	<if test="choice == 'title'">
+		WHERE TITLE LIKE '%'||#{ search }||'%'
+	</if>
+	<if test="choice == 'content'">
+		WHERE CONTENT LIKE '%'||#{ search }||'%'
+	</if>
+	<if test="choice == 'id'">
+		WHERE USERID= (SELECT ID FROM SC_USER WHERE NICKNAME = #{search})
+	</if>
+</select>
+
+<insert id="uploadPds" parameterType="mul.com.sc.dto.PdsDto">
+	INSERT INTO SC_PDS( USERID, SEQ, TITLE, CONTENT, 
+		   FILENAME, NEWFILENAME, READCOUNT, DOWNCOUNT, REGDATE )
+	VALUES(#{userid}, SEQ_PDS.NEXTVAL, #{title}, #{content}, #{filename}, #{newfilename}, 0, 0, SYSDATE)
+</insert>
+
+<select id="getPds" parameterType="java.lang.Integer" resultType="mul.com.sc.dto.PdsDto">
+	SELECT USERID, SEQ, TITLE, CONTENT, 
+		   FILENAME, NEWFILENAME, READCOUNT, DOWNCOUNT, REGDATE,
+	       (SELECT NICKNAME FROM SC_USER WHERE ID = USERID) NICKNAME, 
+	       (SELECT AVATAR FROM SC_USER WHERE ID = USERID) AVATAR
+	FROM SC_PDS
+	WHERE SEQ=#{userid}
+</select>
+
+
+<update id="pdsreadcount" parameterType="Integer">
+	UPDATE SC_PDS
+	SET READCOUNT= READCOUNT+1
+	WHERE SEQ=#{seq}
+</update>
+
+<update id="pdsdowncount" parameterType="Integer">
+	UPDATE SC_PDS
+	SET DOWNCOUNT= DOWNCOUNT+1
+	WHERE SEQ=#{seq}
+</update>
+
+<update id="updatePds" parameterType="mul.com.sc.dto.PdsDto">
+	UPDATE SC_PDS
+	SET TITLE=#{title}, CONTENT=#{content}, NEWFILENAME=#{newfilename}
+	WHERE SEQ=#{seq}
+</update>
+
+<delete id="deletePds" parameterType="Integer">
+	DELETE FROM SC_PDS
+	WHERE SEQ=#{seq}
+</delete>
+
+<select id="getLatestPds" resultType="mul.com.sc.dto.PdsDto">
+	SELECT SEQ, TITLE, REGDATE
+	FROM ( SELECT SEQ, TITLE, REGDATE,
+	RANK() OVER (ORDER BY SEQ DESC) AS RNK
+	FROM SC_PDS)
+	WHERE RNK &lt; 6
+</select>
+
+</mapper>
+

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="notice">
+<select id="getlist" resultType="mul.com.sc.dto.NoticeDto">
+	SELECT SEQ, USERID, TITLE, CONTENT, READCOUNT, BBSID, FILENAME, NICKNAME, AVATAR
+	FROM SC_NOTICE, SC_USER
+	WHERE SC_NOTICE.USERID=SC_USER.ID
+	ORDER BY SEQ DESC
+</select>
+
+<select id="getnotice" parameterType="java.lang.Integer" resultType="mul.com.sc.dto.NoticeDto">
+	SELECT SEQ, USERID, TITLE, CONTENT, READCOUNT, BBSID, FILENAME, NICKNAME, AVATAR, REGDATE
+	FROM SC_NOTICE, SC_USER
+	WHERE SC_NOTICE.USERID=SC_USER.ID AND SC_NOTICE.SEQ=#{seq} 	
+</select>
+
+<insert id="writenotice" parameterType="mul.com.sc.dto.NoticeDto">
+	INSERT INTO SC_NOTICE(SEQ, USERID, TITLE, CONTENT, READCOUNT, BBSID, FILENAME, REGDATE)
+	VALUES (SC_NOTICE_SEQ.NEXTVAL, #{userid}, #{title}, #{content}, #{readcount}, #{bbsid}, #{filename}, SYSDATE)
+</insert>
+
+<update id="updatenotice" parameterType="mul.com.sc.dto.NoticeDto">
+	UPDATE SC_NOTICE
+	SET TITLE=#{title}, CONTENT=#{content}, FILENAME=#{filename}
+	WHERE SEQ=#{seq}
+</update>
+
+<update id="readcountnotice" parameterType="java.lang.Integer">
+	UPDATE SC_NOTICE
+	SET READCOUNT=READCOUNT+1
+	WHERE SEQ=#{seq}
+
+</update>
+
+<delete id="deletenotice" parameterType="java.lang.Integer">
+	DELETE FROM SC_NOTICE
+	WHERE SEQ=#{seq}
+</delete>
+
+<select id="getLatestNotice" resultType="mul.com.sc.dto.NoticeDto">
+	SELECT SEQ, TITLE, REGDATE
+	FROM ( SELECT SEQ, TITLE, REGDATE,
+	RANK() OVER (ORDER BY SEQ DESC) AS RNK
+	FROM SC_NOTICE)
+	WHERE RNK='1'
+</select>
+
+<select id="noticepaginglist" parameterType="mul.com.sc.dto.BbsParam" resultType="mul.com.sc.dto.NoticeDto">
+	SELECT USERID, SEQ, TITLE, CONTENT, FILENAME, READCOUNT, REGDATE, 
+	(SELECT NICKNAME FROM SC_USER WHERE ID = USERID) NICKNAME 
+	FROM (SELECT ROW_NUMBER()OVER(ORDER BY SEQ DESC) AS RNUM,
+		USERID, SEQ, TITLE, CONTENT, FILENAME, READCOUNT, REGDATE
+
+	FROM SC_NOTICE
+	ORDER BY SEQ DESC)
+	WHERE RNUM BETWEEN #{start} AND #{end}
+</select>
+
+
+
+
+</mapper>
